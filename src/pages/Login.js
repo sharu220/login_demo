@@ -28,7 +28,7 @@ function Login() {
         );
 
         localStorage.setItem("demo-site-uname", username);
-        navigate("/home");
+        navigate("/");
       } else {
         alert("Wrong Password");
       }
