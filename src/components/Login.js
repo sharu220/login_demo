@@ -1,26 +1,37 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-  };
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    
-  
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!passwordRegex.test.password) {
+    if (!passwordRegex.test(password)) {
       setError(
-        alert("Password must contain 8 characters, one uppercase, one lowercase, one number, and one special character.")
-      ); return;
-     
+        "Password must contain 8 characters, one uppercase, one lowercase, one number, and one special character."
+      );
+    } else {
+      setError("");
+
+      if (username === "admin" && password === "Admin@123") {
+        // success(
+        alert(
+          "Login SuccessFull"
+          // )
+        );
+
+        localStorage.setItem("demo-site-uname", username);
+        navigate("/home");
+      } else {
+        alert("Wrong Password");
+      }
     }
     console.log(username);
   };
@@ -29,7 +40,7 @@ function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form
         onSubmit={handleSubmit}
-        className="max-w-sm mx-auto bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/50 items-center	"
+        className="max-w-sm w-full mx-auto bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/50 items-center	"
       >
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Login</h1>
@@ -59,10 +70,11 @@ function Login() {
             className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 shadow-sm"
             name="password"
             value={password}
-            onChange={handlePasswordChange}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter password"
             required
           />
+          {error && <p className="text-xs text-center text-red-600">{error}</p>}
         </div>
 
         <button
