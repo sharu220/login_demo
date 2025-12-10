@@ -22,7 +22,7 @@ function Login() {
       setError("");
       if (username === "admin" && password === "Admin@123") {
         toast.success("Login Successfull");
-        localStorage.setItem("demo-site-uname", username);
+        sessionStorage.setItem("demo-site-uname", username);
         navigate("/");
       } else {
         toast.error("Wrong Password or Username");

@@ -5,14 +5,16 @@ function Layout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!localStorage.getItem("demo-site-uname")) {
+    if (!sessionStorage.getItem("demo-site-uname")) {
       navigate("/login");
     }
   }, []);
 
-  return <div>
-    <Outlet/>
-  </div>;
+  return (
+    <div>
+      <Outlet />
+    </div>
+  );
 }
 
 export default Layout;
