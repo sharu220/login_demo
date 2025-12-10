@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
@@ -19,18 +20,12 @@ function Login() {
       );
     } else {
       setError("");
-
       if (username === "admin" && password === "Admin@123") {
-        // success(
-        alert(
-          "Login SuccessFull"
-          // )
-        );
-
+        toast.success("Login Successfull");
         localStorage.setItem("demo-site-uname", username);
         navigate("/");
       } else {
-        alert("Wrong Password");
+        toast.error("Wrong Password or Username");
       }
     }
     console.log(username);

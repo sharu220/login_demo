@@ -1,45 +1,41 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Sidebar } from "../components/Sidebar";
 
 function Inbox() {
-  const messages = [
-    {
-      id: 1,
-      name: "John Doe",
-      message: "Your report has been approved.",
-      time: "10:45 AM",
-    },
-    {
-      id: 2,
-      name: "Admin Team",
-      message: "New update available. Please review.",
-      time: "09:20 AM",
-    },
-    {
-      id: 3,
-      name: "Support",
-      message: "Your ticket has been resolved.",
-      time: "Yesterday",
-    },
-  ];
+  const [message, setMessage] = useState([]);
+
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/posts")
+      .then((res) => res.json())
+      .then((data) => {
+        const formated = data.map((item) => ({
+          id: item.id,
+          name: `User${item.userId}`,
+          message: item.body,
+          time: "Just Now",
+        }));  
+        setMessage(formated);
+      })
+      .catch((error) => console.error("Api Error", error));
+  }, []);
 
   return (
     <div className="flex">
       <Sidebar />
-<div className="p-6 bg-gray-100 min-h-screen w-full">
+      <div className="p-6 bg-gray-100 min-h-screen w-full ">
         <h1 className="text-2xl font-bold mb-5">Inbox</h1>
 
         <div className="bg-white shadow-md rounded-xl divide-y">
-          {messages.map((msg) => (
+          {message.map((msg) => (
             <div
               key={msg.id}
               className="p-4 hover:bg-gray-50 cursor-pointer transition "
             >
+              <h2 className="font-semibold text-gray-800">{msg.name}</h2>
               <div className="flex justify-between items-center">
-                <h2 className="font-semibold text-gray-800">{msg.name}</h2>
-                <span className="text-sm text-gray-500">{msg.time}</span>
+                <span className="text-sm text-gray-500">{msg.message}</span>
+                <p className="text-sm text-gray-500">{msg.time}</p>
               </div>
-              <p className="text-gray-600 mt-1">{msg.message}</p>
             </div>
           ))}
         </div>

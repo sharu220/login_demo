@@ -7,6 +7,7 @@ import About from "./pages/About";
 import Settings from "./pages/Settings";
 import Inbox from "./pages/Inbox";
 import Profile from "./pages/Profile";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -20,11 +21,12 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/inbox" element={<Inbox />} />
-             <Route path="/profile" element={<Profile/>}/>
-
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Routes>
       </BrowserRouter>
+
+      <Toaster position="bottom-right" />
     </>
   );
 }
