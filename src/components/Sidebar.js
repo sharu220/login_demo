@@ -21,6 +21,7 @@ import {
   PowerIcon,
   Bars3Icon,
   XMarkIcon,
+  BookOpenIcon,
 } from "@heroicons/react/24/solid";
 
 import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
@@ -163,6 +164,13 @@ export function Sidebar() {
                 <UserCircleIcon className="h-5 w-5" />
               </ListItemPrefix>
               Profile
+            </ListItem>
+
+            <ListItem onClick={() => navigate("/products")}>
+              <ListItemPrefix>
+                <BookOpenIcon className="h-5 w-5" />
+              </ListItemPrefix>
+              Products
             </ListItem>
 
             <ListItem onClick={() => navigate("/settings")}>

@@ -8,6 +8,7 @@ import Settings from "./pages/Settings";
 import Inbox from "./pages/Inbox";
 import Profile from "./pages/Profile";
 import { Toaster } from "react-hot-toast";
+import Products from "./pages/Products";
 
 function App() {
   return (
@@ -22,11 +23,12 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/inbox" element={<Inbox />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/products" element={<Products />} />
           </Route>
         </Routes>
       </BrowserRouter>
 
-      <Toaster position="bottom-right" richColors closeButton  />
+      <Toaster position="bottom-right" richColors closeButton />
     </>
   );
 }
