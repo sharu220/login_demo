@@ -1,239 +1,205 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Card,
-  Typography,
+  Input,
   Button,
   Dialog,
   DialogHeader,
   DialogBody,
   DialogFooter,
-  Input,
 } from "@material-tailwind/react";
-import { useNavigate } from "react-router-dom";
 
-const TABLE_HEAD = ["Title", "Category", "Price", "Actions"];
+import toast from "react-hot-toast";
 
 export function DefaultTable() {
+  // PRODUCT LIST
   const [products, setProducts] = useState([]);
-  const navigate = useNavigate();
 
+  // ADD / EDIT MODAL
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(!open);
 
-  // For form fields
+  const [editId, setEditId] = useState(null);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
 
-  // For editing: store the product being edited (null means add mode)
-  const [editingProduct, setEditingProduct] = useState(null);
+  // DELETE MODAL
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
+  // FETCH PRODUCTS (FAKE API)
   useEffect(() => {
-    fetch("https://dummyjson.com/products")
+    fetch("https://fakestoreapi.com/products?limit=20")
       .then((res) => res.json())
-      .then((data) => setProducts(data.products))
-      .catch((err) => console.error(err));
+      .then((data) => {
+        const cleaned = data.map((item) => ({
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          price: item.price,
+        }));
+        setProducts(cleaned);
+      });
   }, []);
 
-  // Open modal in "Add" mode
-  const openAddModal = () => {
-    setEditingProduct(null);
-    setTitle("");
-    setCategory("");
-    setPrice("");
-    setOpen(true);
-  };
-
-  // Open modal in "Edit" mode with prefilled data
-  const openEditModal = (product) => {
-    setEditingProduct(product);
+  // OPEN EDIT MODAL
+  const handleEdit = (product) => {
+    setEditId(product.id);
     setTitle(product.title);
     setCategory(product.category);
     setPrice(product.price);
     setOpen(true);
   };
 
-  // Handle add or edit submit
-  const handleSubmit = () => {
+  // OPEN DELETE MODAL
+  const confirmDelete = (id) => {
+    setDeleteId(id);
+    setDeleteOpen(true);
+  };
+
+  // DELETE PRODUCT
+  const deleteProduct = () => {
+    const result = products.filter((item) => item.id !== deleteId);
+    setProducts(result);
+    setDeleteOpen(false);
+    toast.success("Product deleted");
+  };
+
+  // ADD / UPDATE PRODUCT
+  const saveProduct = () => {
     if (!title || !category || !price) {
-      alert("Please fill all fields");
+      toast.error("All fields are required");
       return;
     }
 
-    if (editingProduct) {
-      // EDIT existing product with PUT
-      fetch(`https://dummyjson.com/products/${editingProduct.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          category,
-          price: parseFloat(price),
-        }),
-      })
-        .then((res) => res.json())
-        .then((updatedProduct) => {
-          // Update the product in local state
-          setProducts((prev) =>
-            prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-          );
-          setOpen(false);
-        })
-        .catch((err) => {
-          console.error(err);
-          alert("Failed to update product");
-        });
+    if (editId) {
+      const updated = products.map((item) =>
+        item.id === editId ? { ...item, title, category, price } : item
+      );
+
+      setProducts(updated);
+      toast.success("Product updated");
     } else {
-      // ADD new product
-      fetch("https://dummyjson.com/products/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          category,
-          price: parseFloat(price),
-        }),
-      })
-        .then((res) => res.json())
-        .then((newProduct) => {
-          setProducts((prev) => [...prev, newProduct]);
-          setOpen(false);
-        })
-        .catch((err) => {
-          console.error(err);
-          alert("Failed to add product");
-        });
+      const newItem = {
+        id: Date.now(),
+        title,
+        category,
+        price,
+      };
+      setProducts([...products, newItem]);
+      toast.success("Product added");
     }
+
+    // reset
+    setEditId(null);
+    setTitle("");
+    setCategory("");
+    setPrice("");
+    setOpen(false);
   };
 
   return (
-    <div className="p-4">
-      {/* Add Product Button */}
-      <Button onClick={openAddModal} color="blue" className="mb-4">
-        + Add Product
-      </Button>
+    <div className="w-full">
+      {/* ADD PRODUCT BUTTON */}
+      <div className="flex justify-end mb-4">
+        <Button
+          size="sm"
+          className="white-blue-600"
+          onClick={() => {
+            setEditId(null);
+            setTitle("");
+            setCategory("");
+            setPrice("");
+            setOpen(true);
+          }}
+        >
+          + Add Product
+        </Button>
+      </div>
 
-      {/* Modal for Add/Edit */}
-      <Dialog open={open} handler={handleOpen} size="sm">
-        <DialogHeader>
-          {editingProduct ? "Edit Product" : "Add Product"}
-        </DialogHeader>
-
-        <DialogBody divider>
-          <div className="flex flex-col gap-4">
-            <Input
-              label="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              autoFocus
-            />
-            <Input
-              label="Category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            />
-            <Input
-              label="Price"
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-          </div>
-        </DialogBody>
-
-        <DialogFooter>
-          <Button
-            variant="text"
-            color="red"
-            onClick={() => setOpen(false)}
-            className="mr-2"
-          >
-            Cancel
-          </Button>
-
-          <Button variant="gradient" color="green" onClick={handleSubmit}>
-            {editingProduct ? "Update" : "Add"}
-          </Button>
-        </DialogFooter>
-      </Dialog>
-
-      {/* Products Table */}
-      <Card className="h-full w-full overflow-scroll">
-        <table className="w-full min-w-max table-auto text-left">
+      {/* TABLE WRAPPER (mobile scroll) */}
+      <div className="overflow-x-auto rounded-xl shadow-md">
+        <table className="min-w-full bg-white">
           <thead>
-            <tr>
-              {TABLE_HEAD.map((head) => (
-                <th
-                  key={head}
-                  className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
-                >
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal leading-none opacity-70"
-                  >
-                    {head}
-                  </Typography>
-                </th>
-              ))}
+            <tr className="bg-gray-100 text-left">
+              <th className="px-4 py-3">Title</th>
+              <th className="px-4 py-3">Category</th>
+              <th className="px-4 py-3">Price</th>
+              <th className="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
 
           <tbody>
-            {products.map((p, index) => {
-              const isLast = index === products.length - 1;
-              const classes = isLast
-                ? "p-4"
-                : "p-4 border-b border-blue-gray-50";
+            {products.map((item) => (
+              <tr key={item.id} className="border-b">
+                <td className="px-4 py-3">{item.title}</td>
+                <td className="px-4 py-3 capitalize">{item.category}</td>
+                <td className="px-4 py-3">${item.price}</td>
+                <td className="px-4 py-3 flex gap-3 justify-center">
+                  <button
+                    className="text-blue-600 font-medium"
+                    onClick={() => handleEdit(item)}
+                  >
+                    Edit
+                  </button>
 
-              return (
-                <tr key={p.id}>
-                  <td className={classes}>
-                    <Typography variant="small" color="blue-gray">
-                      {p.title}
-                    </Typography>
-                  </td>
-
-                  <td className={classes}>
-                    <Typography variant="small" color="blue-gray">
-                      {p.category}
-                    </Typography>
-                  </td>
-
-                  <td className={classes}>
-                    <Typography variant="small" color="blue-gray">
-                      ${p.price}
-                    </Typography>
-                  </td>
-
-                  <td className={`${classes} flex gap-4`}>
-                    <Typography
-                      as="a"
-                      href="#"
-                      variant="small"
-                      color="blue"
-                      className="font-medium cursor-pointer"
-                      onClick={() => openEditModal(p)}
-                    >
-                      Edit
-                    </Typography>
-
-                    <Typography
-                      as="a"
-                      variant="small"
-                      color="red"
-                      className="font-medium cursor-pointer"
-                      onClick={() => navigate("/")}
-                    >
-                      Delete
-                    </Typography>
-                  </td>
-                </tr>
-              );
-            })}
+                  <button
+                    className="text-red-600 font-medium"
+                    onClick={() => confirmDelete(item.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-      </Card>
+      </div>
+
+      {/* ADD / EDIT MODAL */}
+      <Dialog open={open} handler={handleOpen} size="sm">
+        <DialogHeader>{editId ? "Edit Product" : "Add Product"}</DialogHeader>
+        <DialogBody className="space-y-4">
+          <Input
+            label="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <Input
+            label="Category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          />
+          <Input
+            label="Price"
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
+        </DialogBody>
+        <DialogFooter className="space-x-2">
+          <Button variant="text" onClick={handleOpen}>
+            Cancel
+          </Button>
+          <Button className="bg-blue-600" onClick={saveProduct}>
+            {editId ? "Update" : "Add"}
+          </Button>
+        </DialogFooter>
+      </Dialog>
+
+      {/* DELETE CONFIRMATION */}
+      <Dialog open={deleteOpen} handler={() => setDeleteOpen(false)} size="xs">
+        <DialogHeader>Confirm Delete</DialogHeader>
+        <DialogBody>Are you sure you want to delete this product?</DialogBody>
+        <DialogFooter className="space-x-2">
+          <Button variant="text" onClick={() => setDeleteOpen(false)}>
+            Cancel
+          </Button>
+          <Button className="bg-red-600" onClick={deleteProduct}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 }
